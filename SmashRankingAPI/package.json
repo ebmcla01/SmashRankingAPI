@@ -1,0 +1,17 @@
+{
+  "name": "smash-ranking-api",
+  "version": "0.0.0",
+  "description": "SmashRankingAPI",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-bearer-token": "^2.4.0",
+    "firebase": "^5.9.3",
+    "firebase-admin": "^7.2.0",
+    "http-status-codes": "^1.3.2"
+  },
+  "devDependencies": {}
+}
