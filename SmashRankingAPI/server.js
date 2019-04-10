@@ -8,10 +8,6 @@ var serviceAccount = require('./auth/secret.json');
 app.use(token());
 app.use(firebaseAuth);
 
-app.use (function (req, res) {
-    res.send ("Token: " +  req.token);
-});
-
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://elo-rankings-531a9.firebaseio.com'
