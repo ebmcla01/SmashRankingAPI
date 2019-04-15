@@ -22,6 +22,7 @@ app.listen(port, function () {
     firebase.auth().signInWithEmailAndPassword("ebmcla01@louisville.edu", "password");
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
+            console.log(user);
             user.getIdToken().then(function(idToken) {  // <------ Check this line
                 console.log(idToken); // It shows the Firebase token now
              });
