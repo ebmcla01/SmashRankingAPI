@@ -15,6 +15,8 @@ admin.initializeApp({
 app.use(token());
 app.use(firebaseAuth);
 
+var user = admin
+
 //Various Other Middlewares
 var cors = require('cors');
 var bodyParser = require('body-parser');
@@ -27,8 +29,10 @@ app.use(bodyParser.json());
 //Adding Firestore Methods to the App Server 
 //and creating common collection references
 var firestore = require('./dataAccess/firestore');
+var eventController = require('./Controllers/eventController');
 var db = admin.firestore();
 var eventsRef = db.collection('Events');
+var regionsRef = db.collection('Regions');
 
 
 /***********************************************
@@ -44,11 +48,18 @@ app.get('/', function (req, res) {
 });
 
 /*
-* Event Routes Controller
+* Event Routes
 */
+app.get('/api/events', eventController.eventList);
+app.get('/api/events/:eventId', eventController.eventDetail);
+app.post('/api/events', eventController.createEvent);
+app.delete('/api/events/:eventId', eventController.deleteEvent);
+app.patch('/api/events/:eventId', eventController.updateEvent);
+
+
 
 app.get('/api/events', function (req, res) {
-    res.set("Content-Type", 'application/json');
+    //res.set("Content-Type", 'application/json');
     var events = []; 
     //Handle request params
     console.log(req.query);
@@ -77,7 +88,7 @@ app.get('/api/events', function (req, res) {
 });
 
 app.get('/api/events/:eventId', function (req, res) {
-    res.set("Content-Type", 'application/json');
+    //res.set("Content-Type", 'application/json');
     console.log(req.params.eventId);
     eventRef = eventsRef.doc(req.params.eventId);
     eventRef.get()
@@ -92,17 +103,103 @@ app.get('/api/events/:eventId', function (req, res) {
 });
 
 app.post('/api/events', function (req, res) {
+    if (!(req.user.admin || req.user.deity)) {
+        res.status(httpVerbs.FORBIDDEN).send("User does not have sufficient priviledges");
+    }
     console.log("Creating new event");
-    console.log(req.body);
-    db.collection("Events").add(req.body)
+    var regionId = req.body.regionId;
+    delete req.body.regionId;
+    var regionSplit = regionId.split("-");
+    req.body.eventAdmins = [req.user.id];
+    var regionRef = regionsRef.doc(regionSplit[0])
+
+    regionRef.get()
+        .then((snapshot) => {
+            var region = snapshot.data();
+            req.body.region = {id: regionSplit[0], name: region.name};
+            if (region.subregions) { 
+                req.body.region.subregion = region.subregions[regionSplit[1]];
+            }
+            eventsRef.add(req.body)
+                .then((doc) => {
+                    res.send(doc.id);
+                })
+                .catch((err) => {
+                    res.status(500).send("Error adding document: ", err);
+                });
+        })
+        .catch((err) => {
+            res.status(404).send('Region cannot be found: ', err);
+        });  
+});
+
+/*
+* Region Routes
+*/
+
+app.get('/api/regions', function (req, res) {
+    regions = [];
+    console.log("Getting all regions");
+    regionsRef.get()
+        .then((snapshot) => {
+            snapshot.docs.map((doc) => {
+                region = doc.data();
+                region.id = doc.id;
+
+                subregions = [];
+                for(i = 0; i < region.subregions.length; i++) {
+                    subregion = {id: region.id + '-' + i, name: region.subregions[i]};
+                    subregions.push(subregion);
+                }
+                region.subregions = subregions;
+
+                regions.push(region);
+            })
+            res.send(regions);
+        })
+        .catch((err) => {
+            res.status(404).send("No regions to be found");
+        });
+});
+
+app.get('/api/regions/:regionId', function (req, res) {
+    regionsRef.doc(req.params.regionId).get()
         .then((doc) => {
-            console.log("Document written with ID: ", doc.id);
+            region = doc.data();
+            region.id = doc.id;
+            subregions = [];
+            for(i = 0; i < region.subregions.length; i++) {
+                subregion = {id: region.id + '-' + i, name: region.subregions[i]};
+                subregions.push(subregion);
+            }
+            region.subregions = subregions;
+
+            res.json(region);
+        })
+        .catch((err) => {
+            res.status(404).send('Cannot find region. ', err);
+        });
+});
+
+app.post('/api/regions', function (req, res) {
+    if (!(req.user.admin || req.user.deity)) {
+        res.status(httpVerbs.FORBIDDEN).send("User does not have sufficient priviledges");
+    }
+
+    console.log("Creating new region");
+    req.body.createdBy = req.user.id;
+    regionsRef.add(req.body)
+        .then((doc) => {
             res.send(doc.id);
         })
         .catch((err) => {
-            res.status(httpVerbs.INTERNAL_SERVER_ERROR).send("Error adding document: ", err);
-        });
-});
+            res.status(httpVerbs.INTERNAL_SERVER_ERROR).send("Error creating region: ", err);
+        })
+})
+
+/**
+ * User Routes
+ */
 
 app.listen(port, function () {
     console.log('Running on PORT: ' + port);

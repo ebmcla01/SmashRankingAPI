@@ -14,9 +14,8 @@ function firebaseAuth(req, res, next) {
 
     else {
         admin.auth().verifyIdToken(req.token).then(function(decodedToken, claims) {
-            console.log(claims);
             var uid = decodedToken.uid;
-            console.log('User Id: ' + uid);
+            req.user = {id: uid, deity: decodedToken.deity, admin: decodedToken.admin};
             next();
           
             //Leaving for reference for now
