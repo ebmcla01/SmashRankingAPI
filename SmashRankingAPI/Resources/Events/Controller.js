@@ -103,5 +103,19 @@ eventController.createSet = (req, res) => {
         });
 }
 
+eventController.signIn = (req, res) => {
+    console.log("Signing into event");
+    eventRef = eventsRef.doc(req.params.eventId);
+    eventRef.update({
+        participants: admin.firestore.FieldValue.arrayUnion(req.user.id)
+    }).then((data) => {
+        console.log(data);
+        res.send("Signed In!");
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+}
+
 
 module.exports = eventController;
