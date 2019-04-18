@@ -92,6 +92,8 @@ eventController.createEvent = function(req, res) {
 
 eventController.createSet = (req, res) => {
     
+    req.body.players = [req.user.id];
+    
     setsRef = eventsRef.doc(req.params.eventId).collection("Sets");
     setsRef.add(req.body)
         .then((doc) => {
@@ -109,11 +111,23 @@ eventController.signIn = (req, res) => {
     eventRef.update({
         participants: admin.firestore.FieldValue.arrayUnion(req.user.id)
     }).then((data) => {
-        console.log(data);
         res.send("Signed In!");
     })
     .catch((err) => {
         console.log(err);
+        res.status(404).send('Event does not exist');
+    });
+}
+
+eventController.joinSet = (req, res) => {
+    console.log("Joining set");
+    setRef = eventsRef.doc(req.params.eventId).collection("Sets").doc(req.params.setId);
+    setRef.update({
+        players: admin.firestore.FieldValue.arrayUnion(req.user.id)
+    }).then(res.send("Joined Set!"))
+    .catch((err) => {
+        console.log(err);
+        res.status(404).send('Set does not exist');
     });
 }
 
