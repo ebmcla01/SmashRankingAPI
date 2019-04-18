@@ -41,7 +41,7 @@ eventController.eventDetail = function(req, res) {
     eventRef.get()
         .then((snapshot) => {
             var event = snapshot.data();
-            event['id'] = req.params.eventId;
+            event.id = req.params.eventId;
             res.json(event);
         })
         .catch((err) => {
@@ -88,6 +88,19 @@ eventController.createEvent = function(req, res) {
             console.log(err);
             res.status(404).send("Region does not exist");
         });  
+}
+
+eventController.createSet = (req, res) => {
+    
+    setsRef = eventsRef.doc(req.params.eventId).collection("Sets");
+    setsRef.add(req.body)
+        .then((doc) => {
+            res.send(doc.id);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(404).send('Event does not exist');
+        });
 }
 
 

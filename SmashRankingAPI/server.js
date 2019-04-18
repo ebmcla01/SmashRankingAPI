@@ -1,7 +1,8 @@
 //Setting Up Express
-var express = require('express');
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 var expressValidator = require('express-validator');
-var app = express();
 var port = process.env.PORT || 1337;
 
 //Setting Up Token Authorization with Firebase Auth
@@ -36,6 +37,15 @@ app.use('/api/regions', regions);
 var users = require('./Resources/Users/Routes');
 app.use('/api/users', users);
 
+io.on('connection', function(socket) {
+    
+    console.log('A user has connected');
+
+    socket.on('joinEvent', function (event) {
+        socket.join(event);
+        console.log('A user has joined event: ' + event);
+    });
+});
 
 app.listen(port, function () {
     console.log('Running on PORT: ' + port);
