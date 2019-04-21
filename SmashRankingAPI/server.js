@@ -7,7 +7,7 @@ var port = process.env.PORT || 1337;
 
 //Setting Up Token Authorization with Firebase Auth
 var token = require('express-bearer-token');
-var firebaseAuth = require('./auth/firebaseAuth');
+var auth = require('./auth/firebaseAuth');
 var admin = require('firebase-admin');
 var serviceAccount = require('./auth/secret.json');
 admin.initializeApp({
@@ -15,7 +15,7 @@ admin.initializeApp({
     databaseURL: 'https://elo-rankings-531a9.firebaseio.com'
 });
 app.use(token());
-app.use(firebaseAuth);
+app.use(auth.restAuth);
 
 //Various Other Middlewares
 var bodyParser = require('body-parser');
@@ -37,33 +37,13 @@ app.use('/api/regions', regions);
 var users = require('./Resources/Users/Routes');
 app.use('/api/users', users);
 
-io.on('connection', (socket) => {
-    
-    socket.use((packet, next))
+io.use(auth.socketAuth);
 
-    console.log('A user has connected');
-
-    //Need to figure out if user is passing userid or token
-    socket.on('joinGame', function (data) {
-        socket.join(data.game);
-        //Need to add user to game in database
-        console.log('A user has joined event: ' + game);
-    });
-
-    socket.on('leaveGame', function(data) {
-        socket.leave(data.game);
-        console.log('Player: ' + data.player + ' has left game: ' + game);
-    });
-
-    socket.on('eliminateStage', function(data) {
-        console.log(data);
-        //emit sends to everyone in the room, including the client that sent the event
-        socket.to(data.game).emit(data.stages);
-    });
-});
+require('./Resources/Sets/socketEvents')(io);
 
 app.listen(port, function () {
     console.log('Running on PORT: ' + port);
 });
+
 
 

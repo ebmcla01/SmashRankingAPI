@@ -45,7 +45,7 @@ eventController.eventDetail = function(req, res) {
             res.json(event);
         })
         .catch((err) => {
-            res.status(httpVerbs.NOT_FOUND).send('Event doesn\'t exist');
+            res.status(httpVerbs.NOT_FOUND).send('Event does not exist');
         });
 }
 
@@ -78,7 +78,7 @@ eventController.createEvent = function(req, res) {
             }
             eventsRef.add(req.body)
                 .then((doc) => {
-                    res.send(doc.id);
+                    res.status(201).send(doc.id);
                 })
                 .catch((err) => {
                     res.status(500).send("Error adding document: ", err);
@@ -111,7 +111,7 @@ eventController.signIn = (req, res) => {
     eventRef.update({
         participants: admin.firestore.FieldValue.arrayUnion(req.user.id)
     }).then((data) => {
-        res.send("Signed In!");
+        res.send("Signed In");
     })
     .catch((err) => {
         console.log(err);

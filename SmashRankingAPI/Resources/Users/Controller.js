@@ -57,7 +57,7 @@ userController.userDetail = function(req, res) {
 
 userController.updateUser = function(req, res) {
     if (req.body.role && !(req.user.admin || req.user.deity)) {
-        res.status(httpVerbs.FORBIDDEN).send("User does not have sufficient priviledges");
+        res.status(403).send("User does not have sufficient priviledges");
     }
     else if (req.body.role) {
         var role = req.body.role == "admin" ? true : null;
@@ -65,7 +65,7 @@ userController.updateUser = function(req, res) {
             console.log('User given admin role');});
     }
     else if (!(req.params.userId == req.user.id)) {
-        res.status(httpVerbs.FORBIDDEN).send("User does not have sufficient priviledges");
+        res.status(403).send("User does not have sufficient priviledges");
     }
     userRef = usersRef.doc(req.params.userId);
 
@@ -121,7 +121,7 @@ userController.deleteUser = function(req, res) {
     })
     .catch((err) => {
         console.log(err);
-        res.status(404).send("Can't find user");
+        res.status(404).send("User does not exist");
     })
     
 };
@@ -162,7 +162,7 @@ userController.createUser = function(req, res) {
                         }
                     )
                     .then((rank) => {
-                        res.send(doc.id);
+                        res.status(201).send(doc.id);
                     })
                     .catch((err) => {
                         console.log(err);

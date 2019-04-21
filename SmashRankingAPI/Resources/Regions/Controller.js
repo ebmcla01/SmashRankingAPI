@@ -82,10 +82,10 @@ regionController.deleteRegion = function(req, res) {
 
     regionsRef.doc(req.params.regionId).delete()
         .then(() => {
-            res.status(httpVerbs.NO_CONTENT).end();
+            res.status(204).end();
         })
         .catch((err) => {
-            res.status(httpVerbs.NOT_FOUND).end();
+            res.status(404).end("Region does not exist");
         });
 }
 
