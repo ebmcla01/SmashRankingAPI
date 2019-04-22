@@ -142,21 +142,6 @@ eventController.createEvent = function(req, res) {
         });  
 }
 
-eventController.createSet = (req, res) => {
-    
-    req.body.players = [req.user.id];
-    
-    setsRef = eventsRef.doc(req.params.eventId).collection("Sets");
-    setsRef.add(req.body)
-        .then((doc) => {
-            res.send(doc.id);
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(404).send('Event does not exist');
-        });
-}
-
 eventController.signIn = (req, res) => {
     // console.log("Signing into event");
     eventRef = eventsRef.doc(req.params.eventId);

@@ -1,18 +1,31 @@
+var admin = require('firebase-admin');
+var db = admin.firestore();
+
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log('User: ' + socket.user + ' has connected');
+        console.log('User: ' + socket.user.id + ' has connected');
 
         createSet = (set) => {
-            //Create Set here
+    
+            setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
+            delete set.eventId;
+            setsRef.add({ setId: set.bestOf})
+                .then((doc) => {
+                    io.sockets.to(socket.id).emit("setCreated", doc.id);
+                    socket.join(doc.id);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    io.sockets.to(socket.id).emit("errorCreatingSet", "Event does not exist");
+                });
             console.log(set);
-            io.sockets.to(socket.id).emit("setCreated", "This will be the set id");
-            socket.join("setId");
+            
         }
 
         joinSet = (set) => {
             console.log(set);
-            console.log('User: ' + socket.user + ' has joined set ' + setId);
-            socket.join(set.id);
+            console.log('User: ' + socket.user + ' has joined set ' + set.setId);
+            socket.join(set.setId);
         }
 
         disconnect = () => {
