@@ -22,10 +22,22 @@ module.exports = (io) => {
             
         }
 
+        chooseCharacter = (set) => {
+            console.log("Player chose ", set.character);
+            io.to(set.setId).emit("characterChosen", set.character);
+        }
+
         joinSet = (set) => {
             console.log(set);
-            console.log('User: ' + socket.user + ' has joined set ' + set.setId);
+            player = {id: socket.user.id}
+            console.log('User: ' + socket.user.id + ' has joined set ' + set.setId);
             socket.join(set.setId);
+            io.to(set.setId).emit("setJoined", player);
+        }
+
+        removeStage = (set) => {
+            console.log('Remove stage: ', set.stage);
+            io.to(set.setId).emit(set.stage);
         }
 
         disconnect = () => {
@@ -35,5 +47,7 @@ module.exports = (io) => {
         socket.on('createSet', createSet);
         socket.on('joinSet', joinSet)
         socket.on('disconnect', disconnect);
+        socket.on('chooseCharater', chooseCharacter);
+        socket.on('removeStage', removeStage);
     });
 }
