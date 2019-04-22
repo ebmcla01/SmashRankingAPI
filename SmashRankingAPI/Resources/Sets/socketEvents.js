@@ -2,10 +2,6 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log('User: ' + socket.user + ' has connected');
 
-        socket.on('createSet', createSet);
-        socket.on('joinSet', joinSet)
-        socket.on('disconnect', disconnect);
-
         createSet = (set) => {
             //Create Set here
             console.log(set);
@@ -22,5 +18,9 @@ module.exports = (io) => {
         disconnect = () => {
             console.log('A user has disconnected');
         }
+
+        socket.on('createSet', createSet);
+        socket.on('joinSet', joinSet)
+        socket.on('disconnect', disconnect);
     });
 }

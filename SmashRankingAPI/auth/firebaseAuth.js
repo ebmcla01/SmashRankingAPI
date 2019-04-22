@@ -11,7 +11,7 @@ function restFirebaseAuth(req, res, next) {
     //There will be none for this application since account creation is done via client
 
     if (!req.token) {
-        console.log("Missing Bearer Token");
+        console.log("Missing Bearer Token 1");
         return res.status(httpVerbs.UNAUTHORIZED).send("Missing Bearer Token");
     }
 
@@ -30,15 +30,16 @@ function restFirebaseAuth(req, res, next) {
 }
 
 function socketFirebaseAuth(socket, next) {
+    console.log(socket.handshake.query)
     const token = socket.handshake.query.token;
 
     if (!token) {
-        console.log("Missing Bearer Token");
+        console.log("Missing Bearer Token 2");
         return next(new Error('Authentication Error'));
     }
 
     else {
-        admin.auth().verifyIdToken(req.token)
+        admin.auth().verifyIdToken(token)
         .then(function(decodedToken) {
             var uid = decodedToken.uid;
             socket.user = {id: uid, admin: decodedToken.admin};

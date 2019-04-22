@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
+var auth = require('../../auth/firebaseAuth');
 
 var userController = require('./Controller');
+router.use(auth.restAuth);
 
 router.get('/', userController.userList);
 router.post('/', userController.createUser);

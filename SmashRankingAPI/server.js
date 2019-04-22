@@ -15,7 +15,6 @@ admin.initializeApp({
     databaseURL: 'https://elo-rankings-531a9.firebaseio.com'
 });
 app.use(token());
-app.use(auth.restAuth);
 
 //Various Other Middlewares
 var bodyParser = require('body-parser');
@@ -45,5 +44,8 @@ app.listen(port, function () {
     console.log('Running on PORT: ' + port);
 });
 
+io.listen(5000, () => {
+    console.log('listenin');
+})
 
-
+io.on('connection', () => console.log("connection"));
