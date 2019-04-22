@@ -50,38 +50,90 @@ eventController.eventDetail = function(req, res) {
 }
 
 eventController.updateEvent = function(req, res) {
-    res.send('NOT IMPLIMENTED: Update Event');
+    if (!req.user.admin) {
+        res.status(403).send("User does not have sufficient priviledges");
+    }
+    console.log("Updating event");
+    eventRef = eventsRef.doc(req.params.eventId);
+    if (req.body.timeRanges) {
+        timeRanges = req.body.timeRanges;
+        req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
+    }
+    if (req.body.regionId) {
+        regionRef = regionsRef.doc(req.body.regionId);
+        regionRef.get()
+            .then(doc => {
+                if (!doc.exists) {
+                    res.status(404).send("Region does not exist");
+                }
+                eventRef.update(req.body)
+                    .then(res.status(204).end())
+                    .catch(err => {
+                        console.log(err);
+                        res.status(404).send("Event does not exist");
+                    });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(404).send("Region does not exist");
+            });
+    }
 }
 
 eventController.deleteEvent = function(req, res) {
-    res.send('NOT IMPLIMENTED: Delete Event');
+    if (!req.user.admin) {
+        res.status(403).send("User does not have sufficient priviledges");
+    }
+    console.log("Delete event");
+    var eventRef = eventsRef.doc(req.params.eventId);
+    var setsRef = eventRef.collection("Sets");
+    setsRef.get()
+        .then(snapshot => {
+            var batch = db.batch();
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            batch.commit()
+                .then(() => {
+                    eventRef.delete()
+                        .then(() => res.status(204).end())
+                        .catch((err) => {
+                            console.log(err);
+                            res.status(404).send("Event does not exist");
+                        });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(500).send("Error deleting sets");
+                });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(404).send("Sets do not exist");
+        });
 }
 
 eventController.createEvent = function(req, res) {
-    if (!(req.user.admin || req.user.deity)) {
-        res.status(httpVerbs.FORBIDDEN).send("User does not have sufficient priviledges");
+    if (!req.user.admin) {
+        res.status(403).send("User does not have sufficient priviledges");
     }
     console.log("Creating new event");
-    var regionId = req.body.regionId;
-    delete req.body.regionId;
-    var regionSplit = regionId.split("-");
-    req.body.eventAdmins = [req.user.id];
-    var regionRef = regionsRef.doc(regionSplit[0])
+    var regionRef = regionsRef.doc(req.body.regionId);
+    timeRanges = req.body.timeRanges;
+    req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
 
     regionRef.get()
-        .then((snapshot) => {
-            var region = snapshot.data();
-            req.body.region = {id: regionSplit[0], name: region.name};
-            if (regionSplit[1]) { 
-                console.log("This shouldn't happen");
-                req.body.region.subregion = region.subregions[regionSplit[1]];
+        .then((doc) => {
+            if (!doc.exists) {
+                res.status(404).send("Region does not exist");
             }
             eventsRef.add(req.body)
                 .then((doc) => {
                     res.status(201).send(doc.id);
                 })
                 .catch((err) => {
-                    res.status(500).send("Error adding document: ", err);
+                    console.log(err);
+                    res.status(500).send("Error adding document");
                 });
         })
         .catch((err) => {

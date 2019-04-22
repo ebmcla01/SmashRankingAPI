@@ -12,8 +12,6 @@ router.post('/',
 router.get('/:eventId', eventController.eventDetail);
 router.delete('/:eventId', eventController.deleteEvent);
 router.patch('/:eventId', eventController.updateEvent);
-router.post('/:eventId/Sets', eventController.createSet);
-router.post('/:eventId/Sets/:setId', eventController.joinSet);
 router.post('/:eventId/SignIn', eventController.signIn);
 
 module.exports = router;

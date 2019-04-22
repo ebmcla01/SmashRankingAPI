@@ -11,7 +11,7 @@ userController.userList = function(req, res) {
         usersRef = usersRef.where('role', '==', req.query.role);
     }
     if (req.query.regionId) {
-        usersRef = usersRef.where('region.id', '==', req.query.regionId);
+        usersRef = usersRef.where('region', '==', req.query.region);
     }
     usersRef.get()
         .then((snapshot) => {
@@ -56,7 +56,7 @@ userController.userDetail = function(req, res) {
 };
 
 userController.updateUser = function(req, res) {
-    if (req.body.role && !(req.user.admin || req.user.deity)) {
+    if (req.body.role && !req.user.admin) {
         res.status(403).send("User does not have sufficient priviledges");
     }
     else if (req.body.role) {
@@ -70,18 +70,13 @@ userController.updateUser = function(req, res) {
     userRef = usersRef.doc(req.params.userId);
 
     if (req.body.regionId) {
-        var regionId = res.body.regionId;
-        delete res.body.regionId
-        var regionSplit = regionId.split("-");
-        var regionRef = regionsRef.doc(regionSplit[0])
+        var regionRef = regionsRef.doc(req.body.regionId);
 
         regionRef.get()
-            .then((snapshot) => {
-                var region = snapshot.data();
-                req.body.region = {id: regionSplit[0], name: region.name};
-                if (regionSplit[1]) { 
-                    req.body.region.subregion = region.subregions[regionSplit[1]];
-                }
+            .then((doc) => {
+               if (!doc.exists) {
+                   res.status(404).send("Region does not exist");
+               }
                 userRef.update(req.body)
                     .then(() => {
                         res.status(204).end();
@@ -116,7 +111,7 @@ userController.deleteUser = function(req, res) {
     userRef.update({
         isActive: false
     })
-    .then((update) => {
+    .then(() => {
         res.status(204).end();
     })
     .catch((err) => {
@@ -128,22 +123,17 @@ userController.deleteUser = function(req, res) {
 
 userController.createUser = function(req, res) {
     console.log("Creating new user");
-    var regionId = req.body.regionId;
     var primary = req.body.primaryCharacter;
-    delete req.body.regionId;
     delete req.body.primaryCharacter;
-    var regionSplit = regionId.split("-");
-    req.body.dateJoined = Date.now();
+    req.body.dateJoined = admin.firestore.Timestamp.fromMillis(Date.now());
     req.body.role = "Player";
     req.body.isActive = true;
-    var regionRef = regionsRef.doc(regionSplit[0])
+    var regionRef = regionsRef.doc(req.body.regionId)
 
     regionRef.get()
-        .then((snapshot) => {
-            var region = snapshot.data();
-            req.body.region = {id: regionSplit[0], name: region.name};
-            if (regionSplit[1]) { 
-                req.body.region.subregion = region.subregions[regionSplit[1]];
+        .then((doc) => {
+            if (!doc.exists) {
+                res.status(404).send("Region does not exist");
             }
             userRef = usersRef.doc(req.user.id);
             userRef.get()
@@ -154,14 +144,15 @@ userController.createUser = function(req, res) {
                 });
             userRef.set(req.body)
                 .then((doc) => {
-                    userRef.collection("Ranks").doc('1').set(
+                    userRef.collection("Ranks").add(
                         {
                             character: primary,
+                            slotNumber: 1,
                             score: 100,
                             lastUpdated: req.body.dateJoined
                         }
                     )
-                    .then((rank) => {
+                    .then(() => {
                         res.status(201).send(doc.id);
                     })
                     .catch((err) => {
@@ -180,5 +171,20 @@ userController.createUser = function(req, res) {
             res.status(404).send("Region does not exist");
         });  
 };
+
+userController.createRank = (req, res) => {
+    if ((!req.user.id == req.params.userId)) {
+        res.status(403).send("User does not have sufficient privledges");
+    }
+    ranksRef = usersRef(req.params.userId).collection('Ranks');
+    ranksRef.add(req.body)
+        .then(doc => {
+            res.status(201).send(doc.id);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send("Error adding document");
+        });
+}
 
 module.exports = userController;
