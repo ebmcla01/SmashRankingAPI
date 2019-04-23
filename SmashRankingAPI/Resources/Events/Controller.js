@@ -5,6 +5,7 @@ var admin = require('firebase-admin');
 var db = admin.firestore();
 var eventsRef = db.collection('Events');
 var regionsRef = db.collection('Regions');
+var userRef = db.collection('Users');
 
 var eventController = {};
 
@@ -42,10 +43,27 @@ eventController.eventDetail = function(req, res) {
         .then((snapshot) => {
             var event = snapshot.data();
             event.id = req.params.eventId;
-            res.json(event);
+            adminRefs = [];
+            event.eventAdmins.forEach(admin => {
+                adminRefs.push(db.collection("Users").doc(admin));
+            });
+            event.eventAdmins = [];
+            db.getAll(adminRefs)
+                .then(docs => {
+                    docs.forEach(doc => {
+                        console.log(doc.data());
+                        admin = doc.data();
+                        admin.id = doc.id;
+                        event.eventAdmins.push(admin);
+                    })
+                    res.json(event);
+                })
+                .catch(err => console.log(err));
+            
         })
         .catch((err) => {
-            res.status(httpVerbs.NOT_FOUND).send('Event does not exist');
+            console.log(err)
+            res.status(404).send('Event does not exist');
         });
 }
 
