@@ -22,8 +22,13 @@ module.exports = (io) => {
             console.log("Player chose ", set.character);
             //Get rank of chosen character for player
             //save rank to socket
-            io.to(set.setId).emit("characterChosen", set.character);
+            io.to(set.setId).emit("characterChosen", {id: socket.user.id, character: set.character});
             
+        }
+
+        chooseRank = (set) => {
+            console.log("Player chose rank ", set.rank);
+            io.to(set.setId).emit("rankChosen", {id: socket.user.id, rank: set.rank});
         }
 
         joinSet = (set) => {
