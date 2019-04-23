@@ -6,7 +6,7 @@ module.exports = (io) => {
         createSet = (set) => {
             console.log('create');
             setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
-            setsRef.add({ bestOf: set.bestOf, players: [socket.user.id] })
+            setsRef.add({ bestOf: set.bestOf, players: [socket.user.id]})
                 .then((doc) => {
                     console.log('docid: ' + doc.id);
                     io.sockets.to(socket.id).emit("setCreated", doc.id);
