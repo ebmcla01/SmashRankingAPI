@@ -120,6 +120,7 @@ eventController.createEvent = function(req, res) {
     console.log("Creating new event");
     var regionRef = regionsRef.doc(req.body.regionId);
     timeRanges = req.body.timeRanges;
+    req.body.admins = [req.user.id];
     req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
 
     regionRef.get()
@@ -155,18 +156,5 @@ eventController.signIn = (req, res) => {
         res.status(404).send('Event does not exist');
     });
 }
-
-eventController.joinSet = (req, res) => {
-    console.log("Joining set");
-    setRef = eventsRef.doc(req.params.eventId).collection("Sets").doc(req.params.setId);
-    setRef.update({
-        players: admin.firestore.FieldValue.arrayUnion(req.user.id)
-    }).then(res.send("Joined Set!"))
-    .catch((err) => {
-        console.log(err);
-        res.status(404).send('Set does not exist');
-    });
-}
-
 
 module.exports = eventController;

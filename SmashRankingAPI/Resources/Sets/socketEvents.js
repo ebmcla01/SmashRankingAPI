@@ -18,18 +18,49 @@ module.exports = (io) => {
                 });
         }
 
+        availableCharacters = (set) => {
+
+        }
+        
         chooseCharacter = (set) => {
             console.log("Player chose ", set.character);
+            //Get rank of chosen character for player
+            //save rank to socket
             io.to(set.setId).emit("characterChosen", set.character);
+            
         }
 
         joinSet = (set) => {
             player = {id: socket.user.id};
             socket.join(set.setId);
-            //Join the player in the database toooooooo
-            io.to(set.setId).emit("setJoined", player);
-        }
 
+            console.log("Joining set");
+            setRef = db.collection("Events").doc(set.eventId).collection("Sets").doc(set.setId);
+            setRef.update({
+                players: admin.firestore.FieldValue.arrayUnion(socket.user.id)
+            }).then(() => {
+                db.collection('Users').doc(player.id).collection("Ranks").get()
+                    .then(snapshot => {
+                        ranks = [];
+                        snapshot.map(doc => {
+                            rank = doc.data()
+                            rank.id = doc.id;
+                            ranks.push(rank);
+                        });
+                        player.ranks = ranks;
+                        io.to(set.setId).emit("setJoined", player);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        //Error handing
+                    });
+                
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+            
+        }
         removeStage = (set) => {
             io.to(set.setId).emit("stageBanned", set.stage);
         }
