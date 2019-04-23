@@ -27,7 +27,7 @@ module.exports = (io) => {
         }
 
         joinSet = (set) => {
-            set = {};
+            // set = {};
             socket.join(set.setId);
 
             console.log("Joining set");
@@ -36,12 +36,16 @@ module.exports = (io) => {
             setRef.update({
                 players: admin.firestore.FieldValue.arrayUnion(socket.user.id)
             });
+            let playerRanks = null;
             setRef.get().then(doc => {
-                doc.players.forEach(player => {
+                console.log(doc.data());
+                doc.data().players.forEach(player => {
+                    console.log(player);
                     db.collection("Users").doc(player).collection("Ranks").get()
-                        .then(() => {
-                            console.log("Getting player ", player, " rankings");
-                            ranks = ranks.docs.map(doc => {
+                        .then(ranks => {
+                            console.log(ranks);
+                            // console.log("Getting player ", player, " rankings");
+                            playerRanks = ranks.docs.map(doc => {
                                 var newRank = doc.data();
                                 newRank.id = doc.id;
                                 return newRank;
@@ -50,10 +54,10 @@ module.exports = (io) => {
                         .catch(err => console.log(err));
                         console.log("Deciding if joiner or creator");
                         if (player == socket.user.id) {
-                            set.joiner = {id: socket.user.id, ranks};
+                            set.joiner = {id: socket.user.id, playerRanks};
                         }
                         else {
-                            set.creator = {ranks};
+                            set.creator = {playerRanks};
                         }
                     });
 
