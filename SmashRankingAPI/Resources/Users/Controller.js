@@ -129,6 +129,13 @@ userController.createUser = function(req, res) {
     req.body.role = "Player";
     req.body.isActive = true;
     var regionRef = regionsRef.doc(req.body.regionId)
+    // console.log(req.body.displayName);
+    claims = {displayName: req.body.displayName};
+    console.log(claims);
+    console.log(req.user.id);
+    admin.auth().setCustomUserClaims(req.user.id, claims).then(() => {
+        console.log('User given display name');
+    }).catch(err => console.log(err));
 
     regionRef.get()
         .then((doc) => {

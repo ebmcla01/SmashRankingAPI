@@ -51,7 +51,9 @@ module.exports = (io) => {
                             newRank.id = doc.id;
                             return newRank;
                         });
-                        set.joiner = { id: socket.user.id, rank: playerRanks };
+                        set.joiner = { id: socket.user.id, 
+                                       displayName: socket.user.displayName, 
+                                       rank: playerRanks };
 
                         db.collection("Users").doc(creator).collection("Ranks").get().then(ranks => {
                             playerRanks = null;
