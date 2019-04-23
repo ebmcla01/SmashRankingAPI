@@ -31,6 +31,7 @@ module.exports = (io) => {
             socket.join(set.setId);
 
             console.log("Joining set");
+            console.log(set);
             setRef = db.collection("Events").doc(set.eventId).collection("Sets").doc(set.setId);
             setRef.update({
                 players: admin.firestore.FieldValue.arrayUnion(socket.user.id)
