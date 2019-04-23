@@ -17,10 +17,6 @@ module.exports = (io) => {
                     io.sockets.to(socket.id).emit("errorCreatingSet", "Event does not exist");
                 });
         }
-
-        availableCharacters = (set) => {
-
-        }
         
         chooseCharacter = (set) => {
             console.log("Player chose ", set.character);
@@ -42,7 +38,7 @@ module.exports = (io) => {
                 db.collection('Users').doc(player.id).collection("Ranks").get()
                     .then(snapshot => {
                         ranks = [];
-                        snapshot.map(doc => {
+                        snapshot.docs.map(doc => {
                             rank = doc.data()
                             rank.id = doc.id;
                             ranks.push(rank);
