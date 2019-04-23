@@ -6,7 +6,8 @@ module.exports = (io) => {
         console.log('User: ' + socket.user.id + ' has connected');
 
         createSet = (set) => {
-    
+            console.log('create');
+
             setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
             delete set.eventId;
             setsRef.add({ setId: set.bestOf})

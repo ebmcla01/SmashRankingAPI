@@ -11,7 +11,7 @@ var eventController = {};
 eventController.eventList = function(req, res) {
     var events = []; 
     //Handle request params
-    console.log(req.query);
+    console.log("ifdk");
     if (req.query.regionId) {
         eventsRef = eventsRef.where('region.id', '==', req.query.regionId);
     }

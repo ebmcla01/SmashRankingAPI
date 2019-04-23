@@ -30,7 +30,6 @@ function restFirebaseAuth(req, res, next) {
 }
 
 function socketFirebaseAuth(socket, next) {
-    console.log(socket.handshake.query)
     const token = socket.handshake.query.token;
 
     if (!token) {
