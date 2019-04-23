@@ -26,7 +26,7 @@ module.exports = (io) => {
             
         }
 
-        joinSet = async (set) => {
+        joinSet = (set) => {
             set = {};
             socket.join(set.setId);
 
