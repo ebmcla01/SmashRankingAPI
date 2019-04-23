@@ -81,7 +81,7 @@ module.exports = (io) => {
         socket.on('createSet', createSet);
         socket.on('joinSet', joinSet)
         socket.on('disconnect', disconnect);
-        socket.on('chooseCharater', chooseCharacter);
+        socket.on('chooseCharacter', chooseCharacter);
         socket.on('removeStage', removeStage);
         socket.on('chooseRank', chooseRank);
     });
