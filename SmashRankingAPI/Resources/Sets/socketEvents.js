@@ -8,8 +8,7 @@ module.exports = (io) => {
         createSet = (set) => {
     
             setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
-            delete set.eventId;
-            setsRef.add({ setId: set.bestOf})
+            setsRef.add({ bestOf: set.bestOf})
                 .then((doc) => {
                     io.sockets.to(socket.id).emit("setCreated", doc.id);
                     socket.join(doc.id);
@@ -29,15 +28,16 @@ module.exports = (io) => {
 
         joinSet = (set) => {
             console.log(set);
-            player = {id: socket.user.id}
+            player = {id: socket.user.id};
             console.log('User: ' + socket.user.id + ' has joined set ' + set.setId);
             socket.join(set.setId);
+            //Join the player in the database toooooooo
             io.to(set.setId).emit("setJoined", player);
         }
 
         removeStage = (set) => {
             console.log('Remove stage: ', set.stage);
-            io.to(set.setId).emit(set.stage);
+            io.to(set.setId).emit("stageBanned", set.stage);
         }
 
         disconnect = () => {
