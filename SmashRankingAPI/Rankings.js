@@ -20,6 +20,7 @@ newRankings = (player, opponent, won) => {
     }
     if (Number.isNaN(Number(won))) {
         console.log('won');
+        console.log(typeof(won));
     }
     return player + k * (Number(won) - playerExpected);
 }
