@@ -213,12 +213,14 @@ getOpponentScore = async (player) => {
     console.log(player);
     const rankRef = db.collection("Users").doc(player.id).collection("Ranks").doc(player.rank.id)
     const rank = await rankRef.get();
+    console.log(rank.data().score);
     return rank.data().score;
 }
 
 getPlayerScore = async (params) => {
     const rankRef = db.collection("Users").doc(params.userId).collection("Ranks").doc(params.rankId);
     const rank = await rankRef.get();
+    console.log(rank.data().score);
     return rank.data().score;
 }
 
@@ -228,7 +230,7 @@ userController.updateScore = async (req, res) => {
     const opponentScore = await getOpponentScore(req.body.opponent);
     const playerScore = await getPlayerScore(req.params);
     const newScore = ranking(playerScore, opponentScore, req.body.won);
-    console.log(newScore);
+    // console.log(newScore);
     db.collection("Users").doc(req.params.userId).collection("Ranks")
         .doc(req.params.rankId)
         .update({
@@ -236,7 +238,8 @@ userController.updateScore = async (req, res) => {
             lastUpdated: now.toISOString()
         })
         .then(() => {
-            res.send(newScore);
+            console.log(newScore.toString());
+            res.send(newScore.toString());
         })
         .catch((err) => console.log(err));
 
