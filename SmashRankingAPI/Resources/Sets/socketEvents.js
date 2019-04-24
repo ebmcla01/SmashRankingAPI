@@ -25,14 +25,14 @@ module.exports = (io) => {
 
         pickWinner = (set) => {
             console.log(set.winner + " choosen as winner");
-            io.sockets.to(set.setId).emit("requestConfirm", set.winner);
+            io.sockets.to(set.setId).emit("winnerPicked", {user: socket.user.id, winner: set.winner});
         }
 
         confirmWinner = (set) => {
             //set.confirmation should be a bool
             console.log(set.confirmation);
 
-            io.sockets.to(set.setId).emit("agreed", set.confirmation);
+            io.sockets.to(set.setId).emit("winnerConfirmed", {user: socket.user.id, confirmed: set.confirmation});
 
         }
         
