@@ -19,8 +19,7 @@ function restFirebaseAuth(req, res, next) {
         admin.auth().verifyIdToken(req.token)
         .then(function(decodedToken) {
             var uid = decodedToken.uid;
-            req.user = {id: uid, admin: decodedToken.admin, displayName: decodedToken.displayName};
-            console.log(req.user);
+            req.user = {id: uid, admin: decodedToken.admin};
             next();
         }).catch(function(err) {
             console.log("An error happened!");
@@ -43,8 +42,6 @@ function socketFirebaseAuth(socket, next) {
         .then(function(decodedToken) {
             var uid = decodedToken.uid;
             socket.user = {id: uid, admin: decodedToken.admin};
-            // socket.user = {id: uid, admin: decodedToken.admin, displayName: decodedToken.displayName};
-            console.log(socket.user);
             next();
         }).catch(function(err) {
             console.log("An error happened!");

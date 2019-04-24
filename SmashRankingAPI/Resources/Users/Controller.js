@@ -5,28 +5,48 @@ var regionsRef = db.collection('Regions');
 
 userController = {};
 
-userController.userList = function(req, res) {
-    var users = [];
+getUsers = async (req) => {
+    const ref = db.collection("Users");
+    let queryRef = ref;
     if (req.query.role) {
-        usersRef = usersRef.where('role', '==', req.query.role);
+        queryRef = queryRef.where('role', '==', req.query.role);
     }
-    if (req.query.regionId) {
-        usersRef = usersRef.where('region', '==', req.query.region);
+    if (req.query.region) {
+        queryRef = queryRef.where('regionId', '==', req.query.region);
     }
-    usersRef.get()
-        .then((snapshot) => {
-            snapshot.docs.map((doc) => {
-                user = doc.data();
-                user.id = doc.id;
-                users.push(user);
-            });
-            res.json(users);
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(404).send("Users do not exist");
-        })
+    const users = [];
+    const usersRef = await queryRef.get();
+    for (userRef of usersRef.docs)  {
+        const user = userRef.data();
+        user.id = userRef.id; 
+        console.log(userRef.id);
+        user.ranks = []; 
+        const ranksRef = await ref.doc(user.id).collection("Ranks").get();
+        for ( rankRef of ranksRef.docs) {
+            const rank = rankRef.data();
+            rank.id = rankRef.id;
+            user.ranks.push(rank);
+        }
+        users.push(user);
+    }
+    // console.log(users);
+    return users;
+}
+
+userController.userList = async function(req, res) {
+    
+
+    try {
+        //console.log(getUsers(req));
+        users =  await getUsers(req);
+        console.log(users);
+    }
+    catch (e) {
+        console.log('Error getting users', e);
+    }
+    res.json(users);
 };
+
 
 userController.userDetail = function(req, res) {
     userRef = usersRef.doc(req.params.userId);
@@ -128,14 +148,7 @@ userController.createUser = function(req, res) {
     req.body.dateJoined = admin.firestore.Timestamp.fromMillis(Date.now());
     req.body.role = "Player";
     req.body.isActive = true;
-    var regionRef = regionsRef.doc(req.body.regionId)
-    // console.log(req.body.displayName);
-    // claims = {displayName: req.body.displayName};
-    // console.log(claims);
-    // console.log(req.user.id);
-    // admin.auth().setCustomUserClaims(req.user.id, claims).then(() => {
-    //     console.log('User given display name');
-    // }).catch(err => console.log(err));
+    var regionRef = regionsRef.doc(req.body.regionId);
 
     regionRef.get()
         .then((doc) => {
