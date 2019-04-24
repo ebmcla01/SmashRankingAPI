@@ -1,7 +1,9 @@
-var admin = require('firebase-admin');
-var db = admin.firestore();
-var usersRef = db.collection('Users');
-var regionsRef = db.collection('Regions');
+const admin = require('firebase-admin');
+const ranking = require('../../Rankings');
+const db = admin.firestore();
+let usersRef = db.collection('Users');
+let regionsRef = db.collection('Regions');
+
 
 userController = {};
 
@@ -205,6 +207,14 @@ userController.createRank = (req, res) => {
             console.log(err);
             res.status(500).send("Error adding document");
         });
+}
+
+userController.updateScore = async (req, res) => {
+    //Lets say we get a winner and loser object with id and rankId in req.body
+    //db.collection("Users").doc(req.body.winner.)
+
+
+    //Save to History collection
 }
 
 module.exports = userController;
