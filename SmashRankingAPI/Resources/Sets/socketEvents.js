@@ -42,7 +42,7 @@ module.exports = (io) => {
             db.collection("Users").doc(socket.user.id).get()
             .then((doc) => {
                 user = doc.data();
-                const opponent = {id: user.id, displayName: user.displayName};
+                const opponent = {id: socket.user.id, displayName: user.displayName};
                 setRef.update({
                     opponent: opponent
                 }).then(() => {
