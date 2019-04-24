@@ -3,10 +3,11 @@ var db = admin.firestore();
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
+
         createSet = (set) => {
             console.log('create');
             setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
-            setsRef.add({ bestOf: set.bestOf, players: [socket.user.id]})
+            setsRef.add({ bestOf: set.bestOf, challenger: {id: socket.user.id, displayName: socket.user.displayName}})
                 .then((doc) => {
                     console.log('docid: ' + doc.id);
                     io.sockets.to(socket.id).emit("setCreated", doc.id);
@@ -35,12 +36,14 @@ module.exports = (io) => {
             socket.join(set.setId);
             setRef = db.collection("Events").doc(set.eventId).collection("Sets").doc(set.setId);
             setRef.update({
-                players: admin.firestore.FieldValue.arrayUnion(socket.user.id)
+                opponent: {id: socket.user.id, displayName: socket.user.displayName}
             }).then(() => {
                 setRef.get().then(doc => {
                     // doc.data().players.forEach(player => {
-                    const joiner = doc.data().players[0] === socket.user.id ? doc.data().players[0] : doc.data().players[1];
-                    const creator = doc.data().players[0] === socket.user.id ? doc.data().players[1] : doc.data().players[0];
+                    const joiner = socket.user.id;
+                    const challenger = doc.data().challenger;
+                    // const joiner = doc.data().players[0] === socket.user.id ? doc.data().players[0] : doc.data().players[1];
+                    // const creator = doc.data().players[0] === socket.user.id ? doc.data().players[1] : doc.data().players[0];
                     console.log(joiner);
                     console.log(creator);
 
@@ -55,14 +58,16 @@ module.exports = (io) => {
                                        displayName: socket.user.displayName, 
                                        rank: playerRanks };
 
-                        db.collection("Users").doc(creator).collection("Ranks").get().then(ranks => {
+                        db.collection("Users").doc(challenger.id).collection("Ranks").get().then(ranks => {
                             playerRanks = null;
                             playerRanks = ranks.docs.map(doc => {
                                 var newRank = doc.data();
                                 newRank.id = doc.id;
                                 return newRank;
                             });
-                            set.creator = { rank: playerRanks };
+                            set.creator = { id: challenger.id,
+                                            displayName: challenger.displayName,
+                                            rank: playerRanks };
                             console.log(set);
                             io.to(set.setId).emit('setJoined', set);
                         }).catch(err => console.log(err));
