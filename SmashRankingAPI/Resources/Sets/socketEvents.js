@@ -106,6 +106,11 @@ module.exports = (io) => {
             io.to(set.setId).emit("stageBanned", set.stage);
         }
 
+        chooseStage = (set) => {
+            console.log("Stage has been chosen");
+            io.to(set.setId).emit("stageChosen", set.stage);
+        }
+
         disconnect = () => {
             console.log('\ndisconnection -------');
             console.log(Object.keys(io.sockets.sockets))
