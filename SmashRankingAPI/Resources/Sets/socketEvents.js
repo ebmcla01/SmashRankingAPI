@@ -6,17 +6,21 @@ module.exports = (io) => {
 
         createSet = (set) => {
             console.log('create');
-            setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
-            setsRef.add({ bestOf: set.bestOf, challenger: {id: socket.user.id, displayName: socket.user.displayName}})
-                .then((doc) => {
-                    console.log('docid: ' + doc.id);
-                    io.sockets.to(socket.id).emit("setCreated", doc.id);
-                    socket.join(doc.id);
+            db.collection('Users').doc(socket.user.id).get()
+                .then(doc => {
+                    setsRef = db.collection("Events").doc(set.eventId).collection("Sets");
+                    setsRef.add({ bestOf: set.bestOf, challenger: {id: socket.user.id, displayName: doc.data().displayName}})
+                        .then((doc) => {
+                            console.log('docid: ' + doc.id);
+                            io.sockets.to(socket.id).emit("setCreated", doc.id);
+                            socket.join(doc.id);
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            io.sockets.to(socket.id).emit("errorCreatingSet", "Event does not exist");
+                        });
                 })
-                .catch((err) => {
-                    console.log(err);
-                    io.sockets.to(socket.id).emit("errorCreatingSet", "Event does not exist");
-                });
+            
         }
         
         chooseCharacter = (set) => {
