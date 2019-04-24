@@ -124,5 +124,6 @@ module.exports = (io) => {
         socket.on('chooseRank', chooseRank);
         socket.on('pickWinner', pickWinner);
         socket.on('confirmWinner', confirmWinner);
+        socket.on('chooseStage', chooseStage);
     });
 }
