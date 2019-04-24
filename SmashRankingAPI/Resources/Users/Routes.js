@@ -11,6 +11,6 @@ router.get('/:userId', userController.userDetail);
 router.delete('/:userId', userController.deleteUser);
 router.patch('/:userId', userController.updateUser);
 router.post('/:userId/Rank', userController.createRank);
-router.post('/myRank', userController.updateScore);
+router.post('/:userId/Rank/:rankId', userController.updateScore);
 
 module.exports = router;

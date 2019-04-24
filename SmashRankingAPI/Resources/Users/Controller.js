@@ -209,9 +209,39 @@ userController.createRank = (req, res) => {
         });
 }
 
+getOpponentScore = async (player) => {
+    console.log(player);
+    const rankRef = db.collection("Users").doc(player.id).collection("Ranks").doc(player.rank.id)
+    const rank = await rankRef.get();
+    return rank.data().score;
+}
+
+getPlayerScore = async (params) => {
+    const rankRef = db.collection("Users").doc(params.userId).collection("Ranks").doc(params.rankId);
+    const rank = await rankRef.get();
+    return rank.data().score;
+}
+
 userController.updateScore = async (req, res) => {
+    console.log("Updating score");
+    const now = new Date();
+    const opponentScore = await getOpponentScore(req.body.opponent);
+    const playerScore = await getPlayerScore(req.params);
+    const newScore = ranking(playerScore, opponentScore, req.body.won);
+    console.log(newScore);
+    db.collection("Users").doc(req.params.userId).collection("Ranks")
+        .doc(req.params.rankId)
+        .update({
+            score: newScore,
+            lastUpdated: now.toISOString()
+        })
+        .then(() => {
+            res.status(204).end();
+        })
+        .catch((err) => console.log(err));
+
     //Lets say we get a winner and loser object with id and rankId in req.body
-    //db.collection("Users").doc(req.body.winner.)
+    
 
 
     //Save to History collection
