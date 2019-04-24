@@ -74,14 +74,8 @@ eventController.updateEvent = function(req, res) {
     console.log("Updating event");
     eventRef = eventsRef.doc(req.params.eventId);
     if (req.body.timeRanges) {
-        req.body.timeRanges.forEach(timeRange => {
-            timeRange.start = admin.firestore.Timestamp.fromDate(new Date(timeRange.start));
-            timeRange.end = admin.firestore.Timestamp.fromDate(new Date(timeRange.end));
-            console.log(timeRange);
-        });
-        console.log(req.body.timeRanges);
-        req.body.timeFrame = {start: req.body.timeRanges[0].start, end: req.body.timeRanges[req.body.timeRanges.length-1].end};
-    
+        timeRanges = req.body.timeRanges;
+        req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
     }
     if (req.body.regionId) {
         regionRef = regionsRef.doc(req.body.regionId);
@@ -144,12 +138,6 @@ eventController.createEvent = function(req, res) {
     console.log("Creating new event");
     var regionRef = regionsRef.doc(req.body.regionId);
     req.body.admins = [req.user.id];
-    console.log(req.body.timeRanges);
-    req.body.timeRanges.forEach(timeRange => {
-        timeRange.start = admin.firestore.Timestamp.fromDate(new Date(timeRange.start));
-        timeRange.end = admin.firestore.Timestamp.fromDate(new Date(timeRange.end));
-        console.log(timeRange);
-    });
     console.log(req.body.timeRanges);
     req.body.timeFrame = {start: req.body.timeRanges[0].start, end: req.body.timeRanges[req.body.timeRanges.length-1].end};
 
