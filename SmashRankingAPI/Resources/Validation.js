@@ -9,9 +9,9 @@ validation.validate = (method) => {
         case 'createEvent': {
             return [
                 check('name').exists().withMessage("Must provide an event name"),
-                check('region').exists().withMessage("Event must belong to a region"),
-                sanitizeBody('timeRange.start').toDate(),
-                sanitizeBody('timeRange.end').toDate()
+                check('regionId').exists().withMessage("Event must belong to a region"),
+                // sanitizeBody('timeRange.start').toDate(),
+                // sanitizeBody('timeRange.end').toDate()
             ]
         }
     }

@@ -74,8 +74,14 @@ eventController.updateEvent = function(req, res) {
     console.log("Updating event");
     eventRef = eventsRef.doc(req.params.eventId);
     if (req.body.timeRanges) {
-        timeRanges = req.body.timeRanges;
-        req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
+        req.body.timeRanges.forEach(timeRange => {
+            timeRange.start = admin.firestore.Timestamp.fromDate(new Date(timeRange.start));
+            timeRange.end = admin.firestore.Timestamp.fromDate(new Date(timeRange.end));
+            console.log(timeRange);
+        });
+        console.log(req.body.timeRanges);
+        req.body.timeFrame = {start: req.body.timeRanges[0].start, end: req.body.timeRanges[req.body.timeRanges.length-1].end};
+    
     }
     if (req.body.regionId) {
         regionRef = regionsRef.doc(req.body.regionId);
@@ -132,14 +138,20 @@ eventController.deleteEvent = function(req, res) {
 }
 
 eventController.createEvent = function(req, res) {
-    if (!req.user.admin) {
-        res.status(403).send("User does not have sufficient priviledges");
-    }
+    // if (!req.user.admin) {
+    //     res.status(403).send("User does not have sufficient priviledges");
+    // }
     console.log("Creating new event");
     var regionRef = regionsRef.doc(req.body.regionId);
-    timeRanges = req.body.timeRanges;
     req.body.admins = [req.user.id];
-    req.body.timeFrame = {start: timeRanges[0].start, end: timeRanges[timeRanges.length-1].end};
+    console.log(req.body.timeRanges);
+    req.body.timeRanges.forEach(timeRange => {
+        timeRange.start = admin.firestore.Timestamp.fromDate(new Date(timeRange.start));
+        timeRange.end = admin.firestore.Timestamp.fromDate(new Date(timeRange.end));
+        console.log(timeRange);
+    });
+    console.log(req.body.timeRanges);
+    req.body.timeFrame = {start: req.body.timeRanges[0].start, end: req.body.timeRanges[req.body.timeRanges.length-1].end};
 
     regionRef.get()
         .then((doc) => {

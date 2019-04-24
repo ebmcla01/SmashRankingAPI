@@ -209,9 +209,9 @@ userController.createRank = (req, res) => {
         });
 }
 
-userController.updateScores =async (req, res) => {
-    //Lets say we get a winner and loser object with userId and rankId in req.body
-    db.collection("Users").doc(req.body.winn)
+userController.updateScore = async (req, res) => {
+    //Lets say we get a winner and loser object with id and rankId in req.body
+    //db.collection("Users").doc(req.body.winner.)
 
 
     //Save to History collection
