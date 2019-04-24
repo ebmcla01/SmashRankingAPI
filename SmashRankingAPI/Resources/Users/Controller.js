@@ -236,7 +236,7 @@ userController.updateScore = async (req, res) => {
             lastUpdated: now.toISOString()
         })
         .then(() => {
-            res.status(204).end();
+            res.status.send(newScore);
         })
         .catch((err) => console.log(err));
 
