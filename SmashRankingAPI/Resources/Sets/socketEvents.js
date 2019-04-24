@@ -22,6 +22,19 @@ module.exports = (io) => {
                 })
             
         }
+
+        pickWinner = (set) => {
+            console.log(set.winner + " choosen as winner");
+            io.sockets.to(set.setId).emit("requestConfirm", set.winner);
+        }
+
+        confirmWinner = (set) => {
+            //set.confirmation should be a bool
+            console.log(set.confirmation);
+
+            io.sockets.to(set.setId).emit("agreed", set.confirmation);
+
+        }
         
         chooseCharacter = (set) => {
             console.log("Player chose ", set.character);
@@ -104,5 +117,7 @@ module.exports = (io) => {
         socket.on('chooseCharacter', chooseCharacter);
         socket.on('removeStage', removeStage);
         socket.on('chooseRank', chooseRank);
+        socket.on('pickWinner', pickWinner);
+        socket.on('confirmWinner', confirmWinner);
     });
 }
