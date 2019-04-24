@@ -210,17 +210,18 @@ userController.createRank = (req, res) => {
 }
 
 getOpponentScore = async (player) => {
-    console.log(player);
+    console.log("geting Opponent score ", player.id);
     const rankRef = db.collection("Users").doc(player.id).collection("Ranks").doc(player.rank.id)
     const rank = await rankRef.get();
-    console.log(rank.data().score);
+    console.log("Opponent's score is ", rank.data().score);
     return rank.data().score;
 }
 
 getPlayerScore = async (params) => {
+    console.log("getting player's score ", params.userId);
     const rankRef = db.collection("Users").doc(params.userId).collection("Ranks").doc(params.rankId);
     const rank = await rankRef.get();
-    console.log(rank.data().score);
+    console.log("Player\'s score id ", rank.data().score);
     return rank.data().score;
 }
 
@@ -230,18 +231,19 @@ userController.updateScore = async (req, res) => {
     const opponentScore = await getOpponentScore(req.body.opponent);
     const playerScore = await getPlayerScore(req.params);
     const newScore = ranking(playerScore, opponentScore, req.body.won);
+    console.log(req.params.userId, " new score is ", newScore);
     // console.log(newScore);
-    db.collection("Users").doc(req.params.userId).collection("Ranks")
-        .doc(req.params.rankId)
-        .update({
-            score: newScore,
-            lastUpdated: now.toISOString()
-        })
-        .then(() => {
-            console.log(newScore.toString());
-            res.send(newScore.toString());
-        })
-        .catch((err) => console.log(err));
+    // db.collection("Users").doc(req.params.userId).collection("Ranks")
+    //     .doc(req.params.rankId)
+    //     .update({
+    //         score: newScore,
+    //         lastUpdated: now.toISOString()
+    //     })
+    //     .then(() => {
+    //         console.log(newScore.toString());
+    //         res.send(newScore.toString());
+    //     })
+    //     .catch((err) => console.log(err));
 
     //Lets say we get a winner and loser object with id and rankId in req.body
     
