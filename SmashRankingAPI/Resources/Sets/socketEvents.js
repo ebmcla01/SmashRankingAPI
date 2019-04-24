@@ -39,45 +39,54 @@ module.exports = (io) => {
         joinSet = (set) => {
             socket.join(set.setId);
             setRef = db.collection("Events").doc(set.eventId).collection("Sets").doc(set.setId);
-            setRef.update({
-                opponent: {id: socket.user.id, displayName: socket.user.displayName}
-            }).then(() => {
-                setRef.get().then(doc => {
-                    // doc.data().players.forEach(player => {
-                    const joiner = socket.user.id;
-                    const challenger = doc.data().challenger;
-                    // const joiner = doc.data().players[0] === socket.user.id ? doc.data().players[0] : doc.data().players[1];
-                    // const creator = doc.data().players[0] === socket.user.id ? doc.data().players[1] : doc.data().players[0];
-                    console.log(joiner);
-                    console.log(creator);
-
-                    db.collection("Users").doc(joiner).collection("Ranks").get().then(ranks => {
-                        let playerRanks = null;
-                        playerRanks = ranks.docs.map(doc => {
-                            var newRank = doc.data();
-                            newRank.id = doc.id;
-                            return newRank;
-                        });
-                        set.joiner = { id: socket.user.id, 
-                                       displayName: socket.user.displayName, 
-                                       rank: playerRanks };
-
-                        db.collection("Users").doc(challenger.id).collection("Ranks").get().then(ranks => {
-                            playerRanks = null;
+            db.collection("Users").doc(socket.user.id).get()
+            .then((doc) => {
+                user = doc.data();
+                const opponent = {id: user.id, displayName: user.displayName};
+                setRef.update({
+                    opponent: opponent
+                }).then(() => {
+                    setRef.get().then(doc => {
+                        // doc.data().players.forEach(player => {
+                        const challenger = doc.data().challenger;
+                        // const joiner = doc.data().players[0] === socket.user.id ? doc.data().players[0] : doc.data().players[1];
+                        // const creator = doc.data().players[0] === socket.user.id ? doc.data().players[1] : doc.data().players[0];
+                        // console.log(joiner);
+                        // console.log(creator);
+                       
+                        db.collection("Users").doc(opponent.id).collection("Ranks").get().then(ranks => {
+                            let playerRanks = null;
                             playerRanks = ranks.docs.map(doc => {
                                 var newRank = doc.data();
                                 newRank.id = doc.id;
                                 return newRank;
                             });
-                            set.creator = { id: challenger.id,
-                                            displayName: challenger.displayName,
-                                            rank: playerRanks };
-                            console.log(set);
-                            io.to(set.setId).emit('setJoined', set);
+                            opponent.ranks = playerRanks;
+                            // set.joiner = { id: socket.user.id, 
+                            //                displayName: socket.user.displayName, 
+                            //                rank: playerRanks };
+    
+                            db.collection("Users").doc(challenger.id).collection("Ranks").get().then(ranks => {
+                                playerRanks = null;
+                                playerRanks = ranks.docs.map(doc => {
+                                    var newRank = doc.data();
+                                    newRank.id = doc.id;
+                                    return newRank;
+                                });
+                                challenger.ranks = playerRanks;
+                                // set.creator = { id: challenger.id,
+                                //                 displayName: challenger.displayName,
+                                //                 rank: playerRanks };
+                                set.joiner = opponent;
+                                set.creator = challenger;
+                                console.log(set);
+                                io.to(set.setId).emit('setJoined', set);
+                            }).catch(err => console.log(err));
                         }).catch(err => console.log(err));
-                    }).catch(err => console.log(err));
-                }).catch(err => console.log(err)); // end setRef.get
-            }).catch(err => console.log(err)); // end setRef.update
+                    }).catch(err => console.log(err)); // end setRef.get
+                }).catch(err => console.log(err)); // end setRef.update
+            }).catch(err => console.log(err));
+            
         }
 
         removeStage = (set) => {

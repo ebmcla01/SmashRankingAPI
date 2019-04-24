@@ -42,7 +42,8 @@ function socketFirebaseAuth(socket, next) {
         admin.auth().verifyIdToken(token)
         .then(function(decodedToken) {
             var uid = decodedToken.uid;
-            socket.user = {id: uid, admin: decodedToken.admin, displayName: decodedToken.displayName};
+            socket.user = {id: uid, admin: decodedToken.admin};
+            // socket.user = {id: uid, admin: decodedToken.admin, displayName: decodedToken.displayName};
             console.log(socket.user);
             next();
         }).catch(function(err) {
