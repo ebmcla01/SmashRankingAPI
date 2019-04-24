@@ -230,20 +230,20 @@ userController.updateScore = async (req, res) => {
     const now = new Date();
     const opponentScore = await getOpponentScore(req.body.opponent);
     const playerScore = await getPlayerScore(req.params);
-    const newScore = ranking(playerScore, opponentScore, req.body.won);
+    const newScore = ranking(playerScore, opponentScore, req.body.didWin);
     console.log(req.params.userId, " new score is ", newScore);
     // console.log(newScore);
-    // db.collection("Users").doc(req.params.userId).collection("Ranks")
-    //     .doc(req.params.rankId)
-    //     .update({
-    //         score: newScore,
-    //         lastUpdated: now.toISOString()
-    //     })
-    //     .then(() => {
-    //         console.log(newScore.toString());
-    //         res.send(newScore.toString());
-    //     })
-    //     .catch((err) => console.log(err));
+    db.collection("Users").doc(req.params.userId).collection("Ranks")
+        .doc(req.params.rankId)
+        .update({
+            score: newScore,
+            lastUpdated: now.toISOString()
+        })
+        .then(() => {
+            console.log(newScore.toString());
+            res.send(newScore.toString());
+        })
+        .catch((err) => console.log(err));
 
     //Lets say we get a winner and loser object with id and rankId in req.body
     
